@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Shared Notebook Pro</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app-wrapper">
+    <!-- Chat Sidebar -->
+    <div id="chat-sidebar" class="closed">
+        <div class="chat-header">
+            <div class="chat-header-content">
+                <button class="back-btn" onclick="toggleChat()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <span class="chat-title">Nachrichten</span>
+            </div>
+        </div>
+        <div id="chat-messages"></div>
+        <div class="chat-input-container">
+            <input type="text" id="chatInput" placeholder="Nachricht...">
+            <button class="send-btn" onclick="sendChatMessage()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas Container -->
+    <div id="canvas-container">
+        <!-- Instagram Style Toolbar -->
+        <div id="toolbar">
+            <button class="tool-btn active" id="penBtn" onclick="setTool('pen')" data-tool="pen">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"/>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/>
+                    <path d="M2 2l7.586 7.586"/>
+                </svg>
+            </button>
+            <button class="tool-btn" id="highlighterBtn" onclick="setTool('highlighter')" data-tool="highlighter">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 9l-6 6v4h4l6-6M9 9l5-5 4 4-5 5M9 9l4 4"/>
+                    <path d="M21 15l-3-3"/>
+                </svg>
+            </button>
+            <button class="tool-btn" id="laserBtn" onclick="setTool('laser')" data-tool="laser">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L12 6M12 18L12 22M6 12L2 12M22 12L18 12"/>
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M17 7L19 5M7 17L5 19M17 17L19 19M7 7L5 5" stroke-width="1.5"/>
+                </svg>
+            </button>
+            <button class="tool-btn" id="markerBtn" onclick="setTool('marker')" data-tool="marker">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" opacity="0.3" fill="currentColor"/>
+                    <path d="M3 8h18M3 16h18" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <button class="tool-btn" id="shapeBtn" onclick="setTool('shape')" data-tool="shape">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="8" cy="8" r="4"/>
+                    <rect x="14" y="4" width="6" height="6" rx="1"/>
+                    <path d="M6 20 L12 16 L18 20 L12 24 Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <!-- Games Section -->
+        <div class="toolbar-section">
+            <button class="tool-btn" id="gamesBtn" onclick="toggleGamesMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="7" width="18" height="10" rx="2"/>
+                    <path d="M8 11v2M10 12h-4M16 11h2M17 12v2"/>
+                    <circle cx="8" cy="12" r="1" fill="currentColor"/>
+                    <circle cx="16" cy="12" r="1" fill="currentColor"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="toolbar-divider"></div>
+
+        <div class="toolbar-section">
+            <button class="tool-btn" id="eraserBtn" onclick="setTool('eraser')" data-tool="eraser">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 20H7L2 15l10-10 8 8-2 2z"/>
+                    <path d="M7 20l8-8"/>
+                </svg>
+            </button>
+            <button class="tool-btn" id="textBtn" onclick="setTool('text')" data-tool="text">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="4 7 4 4 20 4 20 7"/>
+                    <line x1="9" y1="20" x2="15" y2="20"/>
+                    <line x1="12" y1="4" x2="12" y2="20"/>
+                </svg>
+            </button>
+            <button class="tool-btn" onclick="document.getElementById('imageInput').click()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+            </button>
+            <button class="tool-btn" onclick="document.getElementById('pdfInput').click()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+            </button>
+            <div class="color-picker-wrapper">
+                <input type="color" id="colorPicker" value="#000000">
+                <div class="color-preview" id="colorPreview"></div>
+            </div>
+            <button class="tool-btn" onclick="toggleBrushSizeMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+            </button>
+            <button class="tool-btn" onclick="toggleBackgroundMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M9 21V9"/>
+                </svg>
+            </button>
+            <button class="tool-btn" onclick="clearAll()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Brush Size Menu -->
+        <div id="brushSizeMenu" class="popup-menu" style="display: none;">
+            <div class="menu-header">Pinselgröße</div>
+            <div class="brush-size-slider">
+                <input type="range" id="brushSize" min="1" max="20" value="3" step="0.5">
+                <div class="brush-preview" id="brushPreview"></div>
+            </div>
+            <div class="brush-size-label"><span id="brushSizeValue">3</span>px</div>
+
+            <div class="menu-divider"></div>
+
+            <div class="menu-header">Textgröße</div>
+            <div class="brush-size-slider">
+                <input type="range" id="textSize" min="12" max="48" value="18" step="2">
+                <div class="text-size-preview" id="textSizePreview">Aa</div>
+            </div>
+            <div class="brush-size-label"><span id="textSizeValue">18</span>px</div>
+
+            <div class="menu-divider"></div>
+
+            <div class="menu-header">Marker-Transparenz</div>
+            <div class="brush-size-slider">
+                <input type="range" id="markerOpacity" min="0.1" max="1" value="0.3" step="0.1">
+                <div class="opacity-preview" id="opacityPreview"></div>
+            </div>
+            <div class="brush-size-label"><span id="opacityValue">30</span>%</div>
+        </div>
+
+        <!-- Background Menu -->
+        <div id="backgroundMenu" class="popup-menu" style="display: none;">
+            <div class="menu-header">Hintergrund</div>
+            <div class="background-grid">
+                <div class="bg-option" data-bg="white" style="background: white;">
+                    <div class="bg-label">Weiß</div>
+                </div>
+                <div class="bg-option" data-bg="dots" style="background: white;">
+                    <div class="dots-preview"></div>
+                    <div class="bg-label">Punkte</div>
+                </div>
+                <div class="bg-option" data-bg="grid" style="background: white;">
+                    <div class="grid-preview"></div>
+                    <div class="bg-label">Gitter</div>
+                </div>
+                <div class="bg-option" data-bg="lines" style="background: white;">
+                    <div class="lines-preview"></div>
+                    <div class="bg-label">Linien</div>
+                </div>
+                <div class="bg-option" data-bg="dark" style="background: #1a1a1a;">
+                    <div class="bg-label" style="color: white;">Dunkel</div>
+                </div>
+                <div class="bg-option" data-bg="blueprint" style="background: #1e3a5f;">
+                    <div class="bg-label" style="color: white;">Blueprint</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Games Menu -->
+        <div id="gamesMenu" class="popup-menu" style="display: none;">
+            <div class="menu-header">🎮 Spiele</div>
+            <div class="game-option" onclick="selectGame('tictactoe')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="4" x2="8" y2="20"/>
+                    <line x1="16" y1="4" x2="16" y2="20"/>
+                    <line x1="4" y1="8" x2="20" y2="8"/>
+                    <line x1="4" y1="16" x2="20" y2="16"/>
+                </svg>
+                <span>Tic Tac Toe</span>
+            </div>
+            <div class="game-option" onclick="selectGame('pingpong')">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="8" width="18" height="8" rx="1"/>
+                    <circle cx="8" cy="12" r="2" fill="currentColor"/>
+                    <line x1="6" y1="6" x2="6" y2="3"/>
+                    <line x1="18" y1="6" x2="18" y2="3"/>
+                </svg>
+                <span>Ping Pong</span>
+            </div>
+            <div class="menu-hint">👆 Klicke auf Canvas, um Spiel zu platzieren</div>
+        </div>
+
+        <canvas id="paper"></canvas>
+
+        <input type="file" id="pdfInput" accept="application/pdf" style="display:none;">
+        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+    </div>
+
+    <!-- Chat Toggle Button -->
+    <button id="chat-toggle" onclick="toggleChat()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <div id="unread-badge">0</div>
+    </button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
