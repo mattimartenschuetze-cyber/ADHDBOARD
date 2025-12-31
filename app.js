@@ -84,7 +84,7 @@ socket.on('canvas_data', (data) => {
         types[el.type] = (types[el.type] || 0) + 1;
         if (el.type === 'game') {
             console.log('   🎮 Game found:', el.gameType, 'at', el.x, el.y);
-
+            
             // Start Ping Pong game loop if needed
             if (el.gameType === 'pingpong' && el.gameStarted && !el.winner && !pingPongLoops[index]) {
                 startPingPongLoop(index);
@@ -114,12 +114,12 @@ socket.on('element_received', (el) => {
         // No animation - just add immediately
         const newIndex = paths.length;
         paths.push(el);
-
+        
         // Start Ping Pong game loop if it's a new ping pong game
         if (el.type === 'game' && el.gameType === 'pingpong' && el.gameStarted && !el.winner) {
             startPingPongLoop(newIndex);
         }
-
+        
         render();
     }
 });
@@ -643,32 +643,54 @@ document.querySelector('.bg-option[data-bg="dots"]').classList.add('active');
 // ========== CANVAS INITIALIZATION ==========
 function init() {
     dpr = window.devicePixelRatio || 1;
-    const w = container.clientWidth;
-    const h = container.clientHeight;
+    
+    // Force proper container dimensions
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    
+    console.log('📐 Initializing canvas: ', w, 'x', h, 'DPR:', dpr);
+    
+    // Set canvas size
     canvas.width = w * dpr;
     canvas.height = h * dpr;
     canvas.style.width = w + 'px';
     canvas.style.height = h + 'px';
+    
+    // Initialize offset to show top-left of virtual canvas
+    // This ensures drawing area starts at the top of the visible viewport
+    if (offset.x === 0 && offset.y === 0 && paths.length === 0) {
+        offset.x = 0;
+        offset.y = 0;
+        console.log('📍 Canvas offset initialized to:', offset);
+    }
+    
     render();
 }
 
 // ========== BACKGROUND DRAWING ==========
 function drawBackground() {
-    const canvasWidth = 4000;
-    const canvasHeight = 4000;
+    // Use actual canvas dimensions for background
+    const canvasWidth = canvas.width / dpr;
+    const canvasHeight = canvas.height / dpr;
+    
+    // Expand background area to cover panned/zoomed view
+    const expandedWidth = canvasWidth / scale + Math.abs(offset.x / scale) * 2;
+    const expandedHeight = canvasHeight / scale + Math.abs(offset.y / scale) * 2;
+    const startX = -Math.abs(offset.x / scale);
+    const startY = -Math.abs(offset.y / scale);
 
     switch(currentBackground) {
         case 'white':
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(startX, startY, expandedWidth, expandedHeight);
             break;
 
         case 'dots':
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(startX, startY, expandedWidth, expandedHeight);
             ctx.fillStyle = '#e0e0e0';
-            for(let x = 0; x < canvasWidth; x += 30) {
-                for(let y = 0; y < canvasHeight; y += 30) {
+            for(let x = Math.floor(startX / 30) * 30; x < startX + expandedWidth; x += 30) {
+                for(let y = Math.floor(startY / 30) * 30; y < startY + expandedHeight; y += 30) {
                     ctx.beginPath();
                     ctx.arc(x, y, 2, 0, Math.PI * 2);
                     ctx.fill();
@@ -678,56 +700,56 @@ function drawBackground() {
 
         case 'grid':
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(startX, startY, expandedWidth, expandedHeight);
             ctx.strokeStyle = '#e0e0e0';
             ctx.lineWidth = 1;
-            for(let x = 0; x < canvasWidth; x += 30) {
+            for(let x = Math.floor(startX / 30) * 30; x < startX + expandedWidth; x += 30) {
                 ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvasHeight);
+                ctx.moveTo(x, startY);
+                ctx.lineTo(x, startY + expandedHeight);
                 ctx.stroke();
             }
-            for(let y = 0; y < canvasHeight; y += 30) {
+            for(let y = Math.floor(startY / 30) * 30; y < startY + expandedHeight; y += 30) {
                 ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvasWidth, y);
+                ctx.moveTo(startX, y);
+                ctx.lineTo(startX + expandedWidth, y);
                 ctx.stroke();
             }
             break;
 
         case 'lines':
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(startX, startY, expandedWidth, expandedHeight);
             ctx.strokeStyle = '#e0e0e0';
             ctx.lineWidth = 1;
-            for(let y = 0; y < canvasHeight; y += 30) {
+            for(let y = Math.floor(startY / 30) * 30; y < startY + expandedHeight; y += 30) {
                 ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvasWidth, y);
+                ctx.moveTo(startX, y);
+                ctx.lineTo(startX + expandedWidth, y);
                 ctx.stroke();
             }
             break;
 
         case 'dark':
             ctx.fillStyle = '#1a1a1a';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(startX, startY, expandedWidth, expandedHeight);
             break;
 
         case 'blueprint':
             ctx.fillStyle = '#1e3a5f';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillRect(startX, startY, expandedWidth, expandedHeight);
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
             ctx.lineWidth = 1;
-            for(let x = 0; x < canvasWidth; x += 30) {
+            for(let x = Math.floor(startX / 30) * 30; x < startX + expandedWidth; x += 30) {
                 ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvasHeight);
+                ctx.moveTo(x, startY);
+                ctx.lineTo(x, startY + expandedHeight);
                 ctx.stroke();
             }
-            for(let y = 0; y < canvasHeight; y += 30) {
+            for(let y = Math.floor(startY / 30) * 30; y < startY + expandedHeight; y += 30) {
                 ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvasWidth, y);
+                ctx.moveTo(startX, y);
+                ctx.lineTo(startX + expandedWidth, y);
                 ctx.stroke();
             }
             break;
@@ -926,7 +948,7 @@ function render() {
             if (g.winner) {
                 const isYouWinner = (g.winner === 'left' && socket.id === g.playerLeft) ||
                                    (g.winner === 'right' && socket.id === g.playerRight);
-                const winnerText = isYouWinner ? 'Du gewinnst! 🏆' :
+                const winnerText = isYouWinner ? 'Du gewinnst! 🏆' : 
                                   (g.winner === 'left' ? 'Blau gewinnt! 🏆' : 'Rot gewinnt! 🏆');
                 ctx.fillStyle = '#27ae60';
                 ctx.fillText(winnerText, g.x + g.width / 2, g.y + g.height + 10);
@@ -1413,7 +1435,7 @@ function handlePointerMove(e) {
         if (game && game.type === 'game' && game.gameType === 'pingpong') {
             // Calculate new paddle Y position (relative to game area)
             const relativeY = pos.y - game.y;
-
+            
             if (draggedPaddleSide === 'left' && socket.id === game.playerLeft) {
                 // Update left paddle
                 game.paddleLeft.y = Math.max(0, Math.min(game.height - game.paddleLeft.height, relativeY - game.paddleLeft.height / 2));
@@ -1423,7 +1445,7 @@ function handlePointerMove(e) {
                 game.paddleRight.y = Math.max(0, Math.min(game.height - game.paddleRight.height, relativeY - game.paddleRight.height / 2));
                 console.log('🏓 Moving right paddle to Y:', game.paddleRight.y.toFixed(1));
             }
-
+            
             render();
             throttledPaddleSync();
         }
@@ -1763,7 +1785,7 @@ function placeGame(gameType, pos) {
 
         socket.emit('new_element', { room: currentRoom, element: game });
         render();
-
+        
         // Start game loop for this game
         startPingPongLoop(gameIndex);
     }
@@ -1858,14 +1880,14 @@ function handleGameClick(pos) {
                 const leftPaddleY = game.y + game.paddleLeft.y;
                 if (pos.x >= leftPaddleX - 20 && pos.x <= leftPaddleX + game.paddleLeft.width + 20 &&
                     pos.y >= leftPaddleY - 20 && pos.y <= leftPaddleY + game.paddleLeft.height + 20) {
-
+                    
                     // Assign player if not assigned
                     if (!game.playerLeft) {
                         game.playerLeft = socket.id;
                         console.log('👤 Player Left (Blue) assigned:', socket.id);
                         socket.emit('game_move', { room: currentRoom, gameIndex: i, game: game });
                     }
-
+                    
                     // Start dragging if this is our paddle
                     if (socket.id === game.playerLeft) {
                         isDraggingPaddle = true;
@@ -1873,14 +1895,14 @@ function handleGameClick(pos) {
                         draggedPaddleSide = 'left';
                         console.log('🏓 Started dragging left paddle');
                     }
-
+                    
                     // Start game if both players are ready
                     if (!game.gameStarted && game.playerLeft && game.playerRight) {
                         game.gameStarted = true;
                         startPingPongLoop(i);
                         socket.emit('game_move', { room: currentRoom, gameIndex: i, game: game });
                     }
-
+                    
                     render();
                     return true;
                 }
@@ -1890,14 +1912,14 @@ function handleGameClick(pos) {
                 const rightPaddleY = game.y + game.paddleRight.y;
                 if (pos.x >= rightPaddleX - 20 && pos.x <= rightPaddleX + game.paddleRight.width + 20 &&
                     pos.y >= rightPaddleY - 20 && pos.y <= rightPaddleY + game.paddleRight.height + 20) {
-
+                    
                     // Assign player if not assigned and different from left player
                     if (!game.playerRight && socket.id !== game.playerLeft) {
                         game.playerRight = socket.id;
                         console.log('👤 Player Right (Red) assigned:', socket.id);
                         socket.emit('game_move', { room: currentRoom, gameIndex: i, game: game });
                     }
-
+                    
                     // Start dragging if this is our paddle
                     if (socket.id === game.playerRight) {
                         isDraggingPaddle = true;
@@ -1905,14 +1927,14 @@ function handleGameClick(pos) {
                         draggedPaddleSide = 'right';
                         console.log('🏓 Started dragging right paddle');
                     }
-
+                    
                     // Start game if both players are ready
                     if (!game.gameStarted && game.playerLeft && game.playerRight) {
                         game.gameStarted = true;
                         startPingPongLoop(i);
                         socket.emit('game_move', { room: currentRoom, gameIndex: i, game: game });
                     }
-
+                    
                     render();
                     return true;
                 }
@@ -2310,10 +2332,10 @@ function startPingPongLoop(gameIndex) {
                 game.ball.x >= game.paddleLeft.x &&
                 game.ball.y >= game.paddleLeft.y &&
                 game.ball.y <= game.paddleLeft.y + game.paddleLeft.height) {
-
+                
                 game.ball.dx = Math.abs(game.ball.dx);
                 game.ball.x = game.paddleLeft.x + game.paddleLeft.width + game.ball.radius;
-
+                
                 // Add spin based on where ball hits paddle
                 const hitPos = (game.ball.y - game.paddleLeft.y) / game.paddleLeft.height;
                 game.ball.dy = (hitPos - 0.5) * 8;
@@ -2324,10 +2346,10 @@ function startPingPongLoop(gameIndex) {
                 game.ball.x <= game.paddleRight.x + game.paddleRight.width &&
                 game.ball.y >= game.paddleRight.y &&
                 game.ball.y <= game.paddleRight.y + game.paddleRight.height) {
-
+                
                 game.ball.dx = -Math.abs(game.ball.dx);
                 game.ball.x = game.paddleRight.x - game.ball.radius;
-
+                
                 // Add spin based on where ball hits paddle
                 const hitPos = (game.ball.y - game.paddleRight.y) / game.paddleRight.height;
                 game.ball.dy = (hitPos - 0.5) * 8;
@@ -2337,7 +2359,7 @@ function startPingPongLoop(gameIndex) {
             if (game.ball.x - game.ball.radius <= 0) {
                 game.paddleRight.score++;
                 resetBall(game);
-
+                
                 // Check for winner
                 if (game.paddleRight.score >= 7) {
                     game.winner = 'right';
@@ -2350,7 +2372,7 @@ function startPingPongLoop(gameIndex) {
             if (game.ball.x + game.ball.radius >= game.width) {
                 game.paddleLeft.score++;
                 resetBall(game);
-
+                
                 // Check for winner
                 if (game.paddleLeft.score >= 7) {
                     game.winner = 'left';
@@ -2375,10 +2397,28 @@ function resetBall(game) {
 }
 
 // ========== EVENT LISTENERS ==========
-window.addEventListener('resize', init);
+window.addEventListener('resize', () => {
+    console.log('📱 Window resized, reinitializing canvas');
+    setTimeout(init, 100); // Small delay to ensure correct dimensions
+});
+
+// Handle orientation changes on mobile
+window.addEventListener('orientationchange', () => {
+    console.log('🔄 Orientation changed, reinitializing canvas');
+    setTimeout(init, 200);
+});
+
 document.getElementById('chatInput').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendChatMessage();
 });
 
 // ========== INITIALIZE ==========
-init();
+// Wait for DOM to be fully loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+// Also init after a short delay to ensure everything is rendered
+setTimeout(init, 100);
