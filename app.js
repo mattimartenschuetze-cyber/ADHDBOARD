@@ -1,5 +1,4 @@
 // ========== INITIALIZATION ==========
-alert("UPDATE");
 const socket = io();
 const canvas = document.getElementById('paper');
 const ctx = canvas.getContext('2d');
