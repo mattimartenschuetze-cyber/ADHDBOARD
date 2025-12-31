@@ -106,7 +106,8 @@ body, html {
 /* ========== CANVAS ========== */
 #canvas-container {
     flex-grow: 1;
-    position: relative;
+    top:0px;
+    position: absolute;
     overflow: hidden;
     background: white;
     touch-action: none;
