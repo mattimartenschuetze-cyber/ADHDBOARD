@@ -109,7 +109,7 @@ body, html {
     position: relative;
     overflow: hidden;
     background: white;
-    touch-action: none;
+    touch-action: none;    
 }
 
 canvas {
