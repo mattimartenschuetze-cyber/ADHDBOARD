@@ -10,8 +10,9 @@ const server = http.createServer(app);
 const io = new Server(server, {
     maxHttpBufferSize: 1e8,
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: ["https://snatch.at", "http://snatch.at", "https://www.snatch.at", "http://www.snatch.at"],
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
