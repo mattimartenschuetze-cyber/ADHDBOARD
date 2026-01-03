@@ -173,3 +173,4 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`📱 Zugriff über: http://localhost:${PORT}`);
     console.log(`📁 Uploads Verzeichnis: ${uploadsDir}`);
 });
+//update
