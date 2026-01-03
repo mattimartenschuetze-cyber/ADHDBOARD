@@ -136,27 +136,55 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle game moves
+    // ========== GAME SOCKET EVENTS ==========
+    
+    // Handle game invites
+    socket.on('game_invite', (payload) => {
+        const { room, gameType, sender } = payload;
+        console.log(`🎮 Game invite sent - Room: ${room}, Game: ${gameType}, From: ${sender}`);
+        
+        socket.to(room).emit('game_invite', payload);
+    });
+
+    // Handle game accept
+    socket.on('game_accept', (payload) => {
+        const { room, gameType, sender } = payload;
+        console.log(`✅ Game accepted - Room: ${room}, Game: ${gameType}`);
+        
+        // Notify sender that game was accepted
+        io.to(sender).emit('game_accept', payload);
+    });
+
+    // Handle game updates (moves, state changes)
+    socket.on('game_update', (payload) => {
+        const { room, gameType } = payload;
+        console.log(`🔄 Game update - Room: ${room}, Game: ${gameType}`);
+        
+        socket.to(room).emit('game_update', payload);
+    });
+
+    // Handle game end
+    socket.on('game_end', (payload) => {
+        const { room, gameType } = payload;
+        console.log(`🏁 Game ended - Room: ${room}, Game: ${gameType}`);
+        
+        socket.to(room).emit('game_end', payload);
+    });
+
+    // Handle old game moves (for canvas-based games - kept for backward compatibility)
     socket.on('game_move', (payload) => {
         const { room, gameIndex, game } = payload;
-        console.log(`📥 Received game move - Room: ${room}, Index: ${gameIndex}, Player: ${game.currentPlayer}`);
+        console.log(`📥 Received game move - Room: ${room}, Index: ${gameIndex}`);
 
         if (roomStorage[room]) {
             // Update the game in storage
             if (roomStorage[room].elements[gameIndex]) {
                 roomStorage[room].elements[gameIndex] = game;
                 console.log(`✅ Updated game in storage at index ${gameIndex}`);
-            } else {
-                console.error(`❌ Game not found at index ${gameIndex} in storage`);
             }
 
             // Broadcast to other players in room
-            const clientsInRoom = io.sockets.adapter.rooms.get(room);
-            console.log(`📤 Broadcasting to ${clientsInRoom ? clientsInRoom.size - 1 : 0} other players in room ${room}`);
-
             socket.to(room).emit('game_move_received', { gameIndex, game });
-        } else {
-            console.error(`❌ Room ${room} not found in storage`);
         }
     });
 
@@ -173,4 +201,3 @@ server.listen(PORT, '0.0.0.0', () => {
     console.log(`📱 Zugriff über: http://localhost:${PORT}`);
     console.log(`📁 Uploads Verzeichnis: ${uploadsDir}`);
 });
-//update
